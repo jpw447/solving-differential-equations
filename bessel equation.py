@@ -6,11 +6,11 @@ from scipy.integrate import odeint
 J0 = 1
 v0 = 0
 
-# Values for v and J: v = dJ/dz
+# Values for v and J: v = dJ/dz 
 v_values = [v0]
 J_values = [J0]
 
-# Setting up values for z
+# Setting up values for z to use
 z_max = 100
 delta_z = 0.01
 z_values = np.arange(0.0001, z_max+delta_z, delta_z)
