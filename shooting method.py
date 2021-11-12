@@ -1,36 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
-# Initial conditions and target. Variables are updated in loop
-V_init = 200
-V = V_init
-Vx = V_init*np.cos(theta_init)
-Vy = V_init.np.sin(theta_init)
-
-x = 0
-y = 0
-x_list = []
-y_list = []
-
-N = 20                  # Number of iterations to perform
-theta_step = np.pi/N
+# Defining angles to test
+N = 10000                  # Number of iterations to perform
 theta_init = 0
-theta_max = np.pi/2
+theta_max = np.pi/8
+theta_step = theta_max/N
+theta_values = np.arange(theta_init, theta_max + theta_step, theta_step)
 
-target = 3000   # Target distance
+# Target, tolerance and constants
+target = 3000 
+tolerance = 0.5
+k = 10e-4
+g = -9.8
 
-theta = np.arange(theta_init, theta_max + theta_step, theta_step)
+# Initial conditions and target
+V = 2000
+
+x_list = [0]
+y_list = [0]
+
+x_array_of_lists = np.ndarray(N, dtype=object)
+y_array_of_lists = np.ndarray(N, dtype=object)
+# Used to check if trajectory hit the target
+check_list = np.ndarray(N, dtype=bool)*False
+
 # Time step and start. Create array after loop
-delta_t = 0.01
+delta_t = 0.001
 t = 0
+start = time.time()
+for i in range(0, N):
+    theta = theta_values[i]
+    # Updating components of V
+    Vx = V*np.cos(theta)
+    Vy = V*np.sin(theta)
 
-for i in range(len(theta)):
-    while (y > 0):
-        V = np.sqrt(Vx**2 + Vy**2)
+    while (y_list[-1] >= 0):
+        V_mag = np.sqrt(Vx**2 + Vy**2)
+        x = x_list[-1]
+        y = y_list[-1]
 
         # Calculations for Vx and x values
         x_prime = Vx
-        Vx_prime = -k*V*Vx
+        Vx_prime = -k*V_mag*Vx
 
         xh = x + (delta_t/2)*Vx
         Vxh = Vx + (delta_t/2)*Vx_prime
@@ -40,7 +53,7 @@ for i in range(len(theta)):
         x_list.append(x)
         
         y_prime = Vy
-        Vy_prime = g - k*V*Vy
+        Vy_prime = g - k*V_mag*Vy
 
         yh = y + (delta_t/2)*Vy
         Vyh = Vy + (delta_t/2)*Vy_prime
@@ -50,3 +63,46 @@ for i in range(len(theta)):
         y_list.append(y)
 
         t += delta_t
+    
+    x_array_of_lists[i] = x_list
+    y_array_of_lists[i] = y_list
+
+    if (x_list[-1] < target+tolerance) and (x_list[-1] > target-tolerance):
+        print("Final x value is "+str(x_list[-1]))
+        check_list[i] = True
+        break
+
+    x_list = [0]
+    y_list = [0]
+    '''
+    try:
+        if check_list[-1] is False & check_list[-2]:
+            on = False
+        else:
+            pass
+    except IndexError:
+        pass
+    '''
+end = time.time()
+duration = np.round(end-start, 3)
+print("That took "+str(duration)+" seconds")
+fig_displacement = plt.figure(figsize=(10, 8))
+ax_displacement = fig_displacement.gca()
+ax_displacement.set_xlabel("$x$ (m)", fontsize=14)
+ax_displacement.set_ylabel("$y$ (m)", fontsize=14)
+ax_displacement.set_title("$x$ versus $y$ positions over time", fontsize=18)
+
+ax_displacement.hlines(0, target-tolerance, target+tolerance, 'k')
+
+# Checks where the loop stopped
+j = np.where(check_list==True)[0][0] + 1
+
+for i in range(j):
+    x = x_array_of_lists[i]
+    y = y_array_of_lists[i]
+    if check_list[i] == True:
+        ax_displacement.plot(x, y, 'g')
+    else:
+        ax_displacement.plot(x, y, 'r--')
+plt.show()
+print(check_list)
