@@ -12,7 +12,7 @@ J_values = [J0]
 
 # Setting up values for z to use
 z_max = 100
-delta_z = 0.000001
+delta_z = 0.001
 z_values = np.arange(0.0001, z_max+delta_z, delta_z)
 start = time.time()
 
@@ -29,6 +29,9 @@ for i in range(len(z_values)):
     # Values at half step
     Jh = J + (delta_z/2)*J_prime # halfway J
     vh = v + (delta_z/2)*v_prime
+
+    # Evaluating dv/dz with new values. We've already evaluated dJ/dz (vh)
+    v_prime = -(1/z)*vh-Jh
 
     # Using halfway values to get new values at full step
     new_J = J + delta_z*vh
