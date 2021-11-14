@@ -74,7 +74,7 @@ for i in range(0, N):
 
     x_list = [0]
     y_list = [0]
-    
+
 end = time.time()
 duration = np.round(end-start, 3)
 print("That took "+str(duration)+" seconds")
